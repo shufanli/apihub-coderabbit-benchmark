@@ -14,9 +14,9 @@ router = APIRouter(prefix="/api/usage", tags=["usage"])
 async def usage_summary(request: Request):
     user_id = require_auth(request)
     now = datetime.utcnow()
-    today_start = now.strftime("%Y-%m-%dT00:00:00Z")
-    month_start = now.replace(day=1).strftime("%Y-%m-%dT00:00:00Z")
-    yesterday_start = (now - timedelta(days=1)).strftime("%Y-%m-%dT00:00:00Z")
+    today_start = now.strftime("%Y-%m-%d 00:00:00")
+    month_start = now.replace(day=1).strftime("%Y-%m-%d 00:00:00")
+    yesterday_start = (now - timedelta(days=1)).strftime("%Y-%m-%d 00:00:00")
 
     with get_db() as conn:
         user = conn.execute("SELECT plan FROM users WHERE id = ?", (user_id,)).fetchone()
@@ -59,7 +59,7 @@ async def usage_chart(request: Request, time_range: str = Query("7d", alias="ran
     user_id = require_auth(request)
     days = {"7d": 7, "30d": 30, "90d": 90}[time_range]
     now = datetime.utcnow()
-    start = (now - timedelta(days=days)).strftime("%Y-%m-%dT00:00:00Z")
+    start = (now - timedelta(days=days)).strftime("%Y-%m-%d 00:00:00")
 
     with get_db() as conn:
         rows = conn.execute(

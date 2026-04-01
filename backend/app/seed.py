@@ -75,7 +75,7 @@ def seed_data():
                     random.choice(endpoints),
                     random.choice(statuses),
                     random.randint(12, 850),
-                    ts.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    ts.strftime("%Y-%m-%d %H:%M:%S"),
                 ),
             )
 
@@ -91,6 +91,6 @@ def seed_data():
                         amount,
                         random.choice(["paid", "paid", "paid", "pending"]) if i == 11 else "paid",
                         f"https://stripe.com/invoices/demo_{i}.pdf",
-                        month_date.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        month_date.strftime("%Y-%m-%d %H:%M:%S"),
                     ),
                 )
