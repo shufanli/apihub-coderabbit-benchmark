@@ -37,4 +37,5 @@ services:
 
 networks:
   survey_default:
+    name: codepulse-survey_default
     external: true
