@@ -43,3 +43,25 @@
 {"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_pricing.py","type":"positive","description":"健康检查"}
 {"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_billing.py","type":"positive","description":"Free用户当前套餐"}
 {"event":"coverage","ts":"2026-04-01T10:16:00Z","lines":84.0,"branches":0,"functions":0,"statements":84.0}
+{"event":"coderabbit_review","ts":"2026-04-01T10:30:00Z","round":1,"issues_found":22,"issues_fixed":22}
+{"event":"bug_found","ts":"2026-04-01T10:30:00Z","source":"coderabbit","description":"Dashboard page uses wrong API field names (today_calls vs today_count etc)","severity":"P0","file":"frontend/src/app/dashboard/page.tsx","fixed":true}
+{"event":"bug_found","ts":"2026-04-01T10:30:00Z","source":"coderabbit","description":"Billing page interface mismatch - plan is string not object","severity":"P0","file":"frontend/src/app/dashboard/billing/page.tsx","fixed":true}
+{"event":"bug_found","ts":"2026-04-01T10:30:00Z","source":"coderabbit","description":"Billing checkout sends plan_id instead of plan","severity":"P0","file":"frontend/src/app/dashboard/billing/page.tsx","fixed":true}
+{"event":"bug_found","ts":"2026-04-01T10:30:00Z","source":"coderabbit","description":"Billing downgrade sends plan_id instead of plan","severity":"P0","file":"frontend/src/app/dashboard/billing/page.tsx","fixed":true}
+{"event":"bug_found","ts":"2026-04-01T10:30:00Z","source":"coderabbit","description":"PyJWT 2.8.0 CVE-2026-32597 vulnerability","severity":"P1","file":"backend/requirements.txt","fixed":true}
+{"event":"bug_found","ts":"2026-04-01T10:30:00Z","source":"coderabbit","description":"Hardcoded production URLs in docker-compose.yml","severity":"P1","file":"docker-compose.yml","fixed":true}
+{"event":"bug_found","ts":"2026-04-01T10:30:00Z","source":"coderabbit","description":"Predictable JWT secret fallback in docker-compose","severity":"P1","file":"docker-compose.yml","fixed":true}
+{"event":"bug_found","ts":"2026-04-01T10:30:00Z","source":"coderabbit","description":"No process cleanup in start.sh","severity":"P1","file":"start.sh","fixed":true}
+{"event":"bug_found","ts":"2026-04-01T10:30:00Z","source":"coderabbit","description":"Missing exception chaining in billing.py","severity":"P2","file":"backend/app/billing.py","fixed":true}
+{"event":"bug_found","ts":"2026-04-01T10:30:00Z","source":"coderabbit","description":"Duplicated PLAN_LIMITS constants across files","severity":"P2","file":"backend/app/billing.py","fixed":true}
+{"event":"bug_found","ts":"2026-04-01T10:30:00Z","source":"coderabbit","description":"Silent error swallowing in billing page catch blocks","severity":"P2","file":"frontend/src/app/dashboard/billing/page.tsx","fixed":true}
+{"event":"bug_found","ts":"2026-04-01T10:30:00Z","source":"coderabbit","description":"Duplicate fetch on mount in billing page","severity":"P2","file":"frontend/src/app/dashboard/billing/page.tsx","fixed":true}
+{"event":"coderabbit_review","ts":"2026-04-01T11:00:00Z","round":2,"issues_found":7,"issues_fixed":7}
+{"event":"bug_found","ts":"2026-04-01T11:00:00Z","source":"coderabbit","description":"Timestamp format mismatch: SQLite YYYY-MM-DD HH:MM:SS vs ISO T..Z","severity":"P0","file":"backend/app/usage.py","fixed":true}
+{"event":"bug_found","ts":"2026-04-01T11:00:00Z","source":"coderabbit","description":"Checkout endpoint missing null user check causes 500","severity":"P1","file":"backend/app/billing.py","fixed":true}
+{"event":"bug_found","ts":"2026-04-01T11:00:00Z","source":"coderabbit","description":"Webhook processes same event multiple times on retry","severity":"P0","file":"backend/app/billing.py","fixed":true}
+{"event":"bug_found","ts":"2026-04-01T11:00:00Z","source":"coderabbit","description":"billing_cycle field accepted but ignored in checkout","severity":"P1","file":"backend/app/billing.py","fixed":true}
+{"event":"bug_found","ts":"2026-04-01T11:00:00Z","source":"coderabbit","description":"Downgrade does not cancel Stripe subscription","severity":"P1","file":"backend/app/billing.py","fixed":true}
+{"event":"coderabbit_review","ts":"2026-04-02T02:00:00Z","round":3,"issues_found":2,"issues_fixed":2}
+{"event":"bug_found","ts":"2026-04-02T02:00:00Z","source":"coderabbit","description":"Webhook dedupe races with SELECT+INSERT, truncated event_id","severity":"P1","file":"backend/app/billing.py","fixed":true}
+{"event":"bug_found","ts":"2026-04-02T02:00:00Z","source":"coderabbit","description":"Downgrade cancels subscription for paid-to-paid transitions","severity":"P0","file":"backend/app/billing.py","fixed":true}
