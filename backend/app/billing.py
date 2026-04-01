@@ -102,8 +102,10 @@ async def downgrade(request: Request, body: DowngradeRequest):
         if plan_order.get(body.plan, 0) >= plan_order.get(user["plan"], 0):
             raise HTTPException(status_code=400, detail="Can only downgrade to a lower plan")
 
-        # Cancel Stripe subscription if exists
-        if user["stripe_customer_id"]:
+        # Cancel Stripe subscription only when downgrading to free (no billing)
+        # For paid-to-paid downgrades (enterprise -> pro), the new subscription
+        # should be created via checkout flow instead
+        if body.plan == "free" and user["stripe_customer_id"]:
             try:
                 subscriptions = stripe.Subscription.list(
                     customer=user["stripe_customer_id"],
@@ -174,18 +176,15 @@ async def stripe_webhook(request: Request):
             amount = PLAN_PRICES.get(plan, {}).get(billing_cycle, PLAN_PRICES.get(plan, {}).get("monthly", 0))
 
             with get_db() as conn:
-                # Idempotency: use event_id as invoice ID prefix to prevent duplicates
-                invoice_id = f"inv_{event_id[:20]}" if event_id else f"inv_{uuid.uuid4().hex[:12]}"
-                existing = conn.execute("SELECT id FROM invoices WHERE id = ?", (invoice_id,)).fetchone()
-                if existing:
-                    return {"received": True}
+                # Idempotency: use full event_id + atomic INSERT OR IGNORE
+                invoice_id = f"inv_{event_id}" if event_id else f"inv_{session.get('id', uuid.uuid4().hex)}"
 
                 conn.execute(
                     "UPDATE users SET plan = ?, stripe_customer_id = ? WHERE id = ?",
                     (plan, customer_id, user_id),
                 )
                 conn.execute(
-                    "INSERT INTO invoices (id, user_id, amount_cents, status, pdf_url) VALUES (?,?,?,?,?)",
+                    "INSERT OR IGNORE INTO invoices (id, user_id, amount_cents, status, pdf_url) VALUES (?,?,?,?,?)",
                     (invoice_id, user_id, amount, "paid", None),
                 )
 
