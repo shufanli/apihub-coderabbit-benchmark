@@ -1,0 +1,45 @@
+{"event":"phase","ts":"2026-04-01T10:00:00Z","agent":"single","name":"development","action":"start"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_auth.py","type":"positive","description":"认证用户获取信息"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_auth.py","type":"positive","description":"登出"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_auth.py","type":"positive","description":"登录重定向到GitHub"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_auth.py","type":"negative","description":"未认证用户返回null"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_auth.py","type":"negative","description":"无效token返回null"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_auth.py","type":"negative","description":"callback缺少code参数"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_keys.py","type":"positive","description":"列出API Keys"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_keys.py","type":"positive","description":"创建API Key"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_keys.py","type":"positive","description":"删除API Key"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_keys.py","type":"negative","description":"未认证列出Keys返回401"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_keys.py","type":"negative","description":"创建Key空名称422"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_keys.py","type":"negative","description":"创建Key无权限422"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_keys.py","type":"negative","description":"创建Key无效权限400"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_keys.py","type":"negative","description":"删除不存在的Key返回404"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_keys.py","type":"negative","description":"删除他人Key返回404"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_keys.py","type":"positive","description":"Free用户列出Keys"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_usage.py","type":"positive","description":"获取使用量摘要"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_usage.py","type":"positive","description":"7天图表数据"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_usage.py","type":"positive","description":"30天图表数据"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_usage.py","type":"positive","description":"90天图表数据"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_usage.py","type":"positive","description":"使用日志列表"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_usage.py","type":"positive","description":"日志分页"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_usage.py","type":"positive","description":"日志状态过滤"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_usage.py","type":"positive","description":"日志端点搜索"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_usage.py","type":"negative","description":"未认证获取摘要401"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_usage.py","type":"negative","description":"无效图表范围422"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_usage.py","type":"positive","description":"Free用户使用量摘要"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_billing.py","type":"positive","description":"获取当前套餐"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_billing.py","type":"positive","description":"降级Pro到Free"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_billing.py","type":"positive","description":"发票列表"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_billing.py","type":"positive","description":"发票分页"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_billing.py","type":"negative","description":"未认证获取套餐401"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_billing.py","type":"negative","description":"降级无效升级400"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_billing.py","type":"negative","description":"降级无效套餐400"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_billing.py","type":"negative","description":"未认证获取发票401"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_billing.py","type":"negative","description":"Free用户无发票"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_billing.py","type":"negative","description":"checkout无效套餐400"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_billing.py","type":"negative","description":"webhook无效签名400"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_pricing.py","type":"positive","description":"获取定价列表"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_pricing.py","type":"positive","description":"定价功能特性"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_pricing.py","type":"positive","description":"年付折扣"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_pricing.py","type":"positive","description":"健康检查"}
+{"event":"test_written","ts":"2026-04-01T10:15:00Z","file":"backend/tests/test_billing.py","type":"positive","description":"Free用户当前套餐"}
+{"event":"coverage","ts":"2026-04-01T10:16:00Z","lines":84.0,"branches":0,"functions":0,"statements":84.0}

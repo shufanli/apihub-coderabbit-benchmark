@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+  apihub:
+    build: .
+    ports:
+      - "8000:8000"
+      - "3000:3000"
+    environment:
+      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID:-demo_github_client_id}
+      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET:-demo_github_client_secret}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-sk_test_demo}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET:-whsec_demo}
+      - STRIPE_PRICE_PRO=${STRIPE_PRICE_PRO:-price_pro_demo}
+      - STRIPE_PRICE_ENTERPRISE=${STRIPE_PRICE_ENTERPRISE:-price_enterprise_demo}
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
+      - BASE_PATH=/apihubcoderabbit
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+      - NEXT_PUBLIC_BASE_PATH=/apihubcoderabbit
+    restart: unless-stopped
