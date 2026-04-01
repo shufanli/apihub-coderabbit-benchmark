@@ -26,6 +26,7 @@ services:
       context: .
       dockerfile: Dockerfile.frontend
     environment:
+      - HOSTNAME=0.0.0.0
       - NEXT_PUBLIC_API_URL=http://apihub-coderabbit-backend:8000
     depends_on:
       - backend
