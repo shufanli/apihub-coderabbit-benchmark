@@ -5,7 +5,8 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/.env.dev"
 
-REPO_URL=$(git remote get-url origin)
+# Convert SSH URL to HTTPS for server access
+REPO_URL=$(git remote get-url origin | sed 's|git@github.com:|https://github.com/|' | sed 's|\.git$||').git
 BRANCH=$(git branch --show-current)
 echo "Git repo: $REPO_URL, branch: $BRANCH"
 
@@ -133,7 +134,7 @@ for i in $(seq 1 60); do
 import sys, json
 data = json.load(sys.stdin)
 tasks = data['InvocationSet'][0]['InvocationTaskBasicInfoSet']
-print(tasks[0]['InvocationTaskStatus'])
+print(tasks[0].get('TaskStatus', tasks[0].get('InvocationTaskStatus', 'UNKNOWN')))
 " 2>/dev/null || echo "UNKNOWN")
 
   echo "  [$i/60] Status: $STATUS"
