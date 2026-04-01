@@ -8,6 +8,7 @@ from pydantic import BaseModel
 
 from app.auth import require_auth
 from app.database import get_db
+from app.plans import PLAN_LIMITS, PLAN_PRICES
 
 router = APIRouter(prefix="/api/billing", tags=["billing"])
 
@@ -17,17 +18,6 @@ STRIPE_PRICE_PRO = os.environ.get("STRIPE_PRICE_PRO", "")
 STRIPE_PRICE_ENTERPRISE = os.environ.get("STRIPE_PRICE_ENTERPRISE", "")
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000")
 BASE_PATH = os.environ.get("BASE_PATH", "")
-
-PLAN_PRICES = {
-    "pro": {"monthly": 2900, "yearly": 28800},
-    "enterprise": {"monthly": 19900, "yearly": 199200},
-}
-
-PLAN_LIMITS = {
-    "free": 1000,
-    "pro": 50000,
-    "enterprise": 500000,
-}
 
 
 @router.get("/current")
@@ -80,7 +70,7 @@ async def create_checkout(request: Request, body: CheckoutRequest):
         session = stripe.checkout.Session.create(**session_params)
         return {"checkout_url": session.url}
     except stripe.StripeError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 class DowngradeRequest(BaseModel):
@@ -146,8 +136,8 @@ async def stripe_webhook(request: Request):
 
     try:
         event = stripe.Webhook.construct_event(body, sig, STRIPE_WEBHOOK_SECRET)
-    except (ValueError, stripe.SignatureVerificationError):
-        raise HTTPException(status_code=400, detail="Invalid webhook signature")
+    except (ValueError, stripe.SignatureVerificationError) as e:
+        raise HTTPException(status_code=400, detail="Invalid webhook signature") from e
 
     if event["type"] == "checkout.session.completed":
         session = event["data"]["object"]

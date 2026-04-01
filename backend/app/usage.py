@@ -5,14 +5,9 @@ from fastapi import APIRouter, HTTPException, Query, Request
 
 from app.auth import require_auth
 from app.database import get_db
+from app.plans import PLAN_LIMITS
 
 router = APIRouter(prefix="/api/usage", tags=["usage"])
-
-PLAN_LIMITS = {
-    "free": 1000,
-    "pro": 50000,
-    "enterprise": 500000,
-}
 
 
 @router.get("/summary")

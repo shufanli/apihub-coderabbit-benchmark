@@ -13,9 +13,9 @@ services:
       - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET:-whsec_demo}
       - STRIPE_PRICE_PRO=${STRIPE_PRICE_PRO:-price_pro_demo}
       - STRIPE_PRICE_ENTERPRISE=${STRIPE_PRICE_ENTERPRISE:-price_enterprise_demo}
-      - JWT_SECRET=${JWT_SECRET:-production_jwt_secret}
-      - FRONTEND_URL=https://teamocode.teamolab.com
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
       - BASE_PATH=/apihubcoderabbit
-      - NEXT_PUBLIC_API_URL=https://teamocode.teamolab.com
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8000}
       - NEXT_PUBLIC_BASE_PATH=/apihubcoderabbit
     restart: unless-stopped

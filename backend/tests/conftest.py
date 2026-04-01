@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 # Set test DB before importing app
 _test_db = tempfile.NamedTemporaryFile(suffix=".db", delete=False)
 os.environ["DB_PATH"] = _test_db.name
-os.environ["JWT_SECRET"] = "test_secret"
+os.environ["JWT_SECRET"] = "test_secret_that_is_at_least_32_bytes_long"
 os.environ["GITHUB_CLIENT_ID"] = "test_client_id"
 os.environ["GITHUB_CLIENT_SECRET"] = "test_client_secret"
 os.environ["STRIPE_SECRET_KEY"] = "sk_test_fake"

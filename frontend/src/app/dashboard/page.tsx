@@ -15,24 +15,25 @@ import {
 } from "recharts";
 
 interface Summary {
-  today_calls: number;
-  yesterday_calls: number;
-  monthly_usage: number;
-  monthly_limit: number;
+  today_count: number;
+  yesterday_count: number;
+  change_pct: number;
+  month_count: number;
+  month_limit: number;
   plan: string;
 }
 
 interface ChartPoint {
   date: string;
-  calls: number;
+  count: number;
 }
 
 interface LogEntry {
-  id: string;
-  time: string;
+  id: number;
   endpoint: string;
-  status: number;
-  latency: number;
+  status_code: number;
+  latency_ms: number;
+  created_at: string;
 }
 
 interface LogsResponse {
@@ -123,8 +124,8 @@ export default function DashboardOverview() {
     try {
       const data = await apiFetch("/api/usage/summary");
       setSummary(data);
-    } catch {
-      // silently fail
+    } catch (error) {
+      console.error("Failed to fetch summary:", error);
     }
   }, []);
 
@@ -133,8 +134,9 @@ export default function DashboardOverview() {
     setChartLoading(true);
     try {
       const data = await apiFetch(`/api/usage/chart?range=${range}`);
-      setChartData(data.points || []);
-    } catch {
+      setChartData(data.data || []);
+    } catch (error) {
+      console.error("Failed to fetch chart:", error);
       setChartData([]);
     } finally {
       setChartLoading(false);
@@ -149,7 +151,8 @@ export default function DashboardOverview() {
       );
       setLogs(data.logs || []);
       setLogsTotal(data.total || 0);
-    } catch {
+    } catch (error) {
+      console.error("Failed to fetch logs:", error);
       setLogs([]);
     }
   }, [logsPage, statusFilter, debouncedSearch]);
@@ -173,19 +176,12 @@ export default function DashboardOverview() {
     };
   }, [fetchSummary, fetchChart, fetchLogs]);
 
-  const changePercent =
-    summary && summary.yesterday_calls > 0
-      ? (
-          ((summary.today_calls - summary.yesterday_calls) /
-            summary.yesterday_calls) *
-          100
-        ).toFixed(1)
-      : null;
+  const changePercent = summary?.change_pct ?? null;
 
   const usagePercent =
-    summary && summary.monthly_limit > 0
+    summary && summary.month_limit > 0
       ? Math.min(
-          Math.round((summary.monthly_usage / summary.monthly_limit) * 100),
+          Math.round((summary.month_count / summary.month_limit) * 100),
           100
         )
       : 0;
@@ -203,15 +199,15 @@ export default function DashboardOverview() {
         <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
           <p className="text-sm font-medium text-gray-500">Today&apos;s Calls</p>
           <p className="mt-2 text-3xl font-bold text-gray-900">
-            {summary ? summary.today_calls.toLocaleString() : "---"}
+            {summary ? summary.today_count.toLocaleString() : "---"}
           </p>
           {changePercent !== null && (
             <p
               className={`mt-1 text-sm font-medium ${
-                Number(changePercent) >= 0 ? "text-green-600" : "text-red-600"
+                changePercent >= 0 ? "text-green-600" : "text-red-600"
               }`}
             >
-              {Number(changePercent) >= 0 ? "+" : ""}
+              {changePercent >= 0 ? "+" : ""}
               {changePercent}% vs yesterday
             </p>
           )}
@@ -257,7 +253,7 @@ export default function DashboardOverview() {
             <div>
               <p className="text-lg font-semibold text-gray-900">
                 {summary
-                  ? `${summary.monthly_usage.toLocaleString()} / ${summary.monthly_limit.toLocaleString()}`
+                  ? `${summary.month_count.toLocaleString()} / ${summary.month_limit.toLocaleString()}`
                   : "---"}
               </p>
               <p className="text-sm text-gray-500">API calls this month</p>
@@ -336,7 +332,7 @@ export default function DashboardOverview() {
                 />
                 <Line
                   type="monotone"
-                  dataKey="calls"
+                  dataKey="count"
                   stroke="#6366f1"
                   strokeWidth={2}
                   dot={false}
@@ -403,20 +399,20 @@ export default function DashboardOverview() {
                 logs.map((log) => (
                   <tr key={log.id} className="hover:bg-gray-50">
                     <td className="whitespace-nowrap px-5 py-3 text-gray-600">
-                      {new Date(log.time).toLocaleString()}
+                      {new Date(log.created_at).toLocaleString()}
                     </td>
                     <td className="px-5 py-3 font-mono text-gray-900">
                       {log.endpoint}
                     </td>
                     <td className="px-5 py-3">
                       <span
-                        className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusColor(log.status)}`}
+                        className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusColor(log.status_code)}`}
                       >
-                        {log.status}
+                        {log.status_code}
                       </span>
                     </td>
                     <td className="whitespace-nowrap px-5 py-3 text-gray-600">
-                      {formatLatency(log.latency)}
+                      {formatLatency(log.latency_ms)}
                     </td>
                   </tr>
                 ))

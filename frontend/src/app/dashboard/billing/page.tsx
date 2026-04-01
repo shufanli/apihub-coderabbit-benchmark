@@ -5,25 +5,29 @@ import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { apiFetch } from "@/lib/api";
 
-interface BillingPlan {
-  id: string;
-  name: string;
-  price: number;
+interface CurrentBilling {
+  plan: string;
+  price_cents: number;
   limit: number;
-  features: string[];
+  stripe_customer_id: string | null;
 }
 
-interface CurrentBilling {
-  plan: BillingPlan;
-  plans: BillingPlan[];
+interface PlanInfo {
+  id: string;
+  name: string;
+  monthly_price: number;
+  yearly_price: number;
+  limit: number;
+  features: string[];
+  popular: boolean;
 }
 
 interface Invoice {
   id: string;
-  date: string;
-  amount: number;
+  amount_cents: number;
   status: string;
-  pdf_url: string;
+  pdf_url: string | null;
+  created_at: string;
 }
 
 interface InvoicesResponse {
@@ -34,15 +38,22 @@ interface InvoicesResponse {
 }
 
 interface UsageSummary {
-  monthly_usage: number;
-  monthly_limit: number;
+  month_count: number;
+  month_limit: number;
 }
+
+const PLAN_DISPLAY: Record<string, { name: string; price: number; limit: number }> = {
+  free: { name: "Free", price: 0, limit: 1000 },
+  pro: { name: "Pro", price: 29, limit: 50000 },
+  enterprise: { name: "Enterprise", price: 199, limit: 500000 },
+};
 
 export default function BillingPage() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
 
   const [billing, setBilling] = useState<CurrentBilling | null>(null);
+  const [plans, setPlans] = useState<PlanInfo[]>([]);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [invoicesTotal, setInvoicesTotal] = useState(0);
   const [invoicePage, setInvoicePage] = useState(1);
@@ -63,8 +74,17 @@ export default function BillingPage() {
     try {
       const data = await apiFetch("/api/billing/current");
       setBilling(data);
-    } catch {
-      // error handling
+    } catch (error) {
+      console.error("Failed to fetch billing:", error);
+    }
+  }, []);
+
+  const fetchPlans = useCallback(async () => {
+    try {
+      const data = await apiFetch("/api/pricing");
+      setPlans(data.plans || []);
+    } catch (error) {
+      console.error("Failed to fetch plans:", error);
     }
   }, []);
 
@@ -75,7 +95,8 @@ export default function BillingPage() {
       );
       setInvoices(data.invoices || []);
       setInvoicesTotal(data.total || 0);
-    } catch {
+    } catch (error) {
+      console.error("Failed to fetch invoices:", error);
       setInvoices([]);
     }
   }, [invoicePage]);
@@ -83,38 +104,43 @@ export default function BillingPage() {
   const fetchUsage = useCallback(async () => {
     try {
       const data = await apiFetch("/api/usage/summary");
-      setUsage({ monthly_usage: data.monthly_usage, monthly_limit: data.monthly_limit });
-    } catch {
-      // error handling
+      setUsage({ month_count: data.month_count, month_limit: data.month_limit });
+    } catch (error) {
+      console.error("Failed to fetch usage:", error);
     }
   }, []);
 
   useEffect(() => {
-    Promise.all([fetchBilling(), fetchInvoices(), fetchUsage()]).finally(() =>
+    Promise.all([fetchBilling(), fetchPlans(), fetchInvoices(), fetchUsage()]).finally(() =>
       setLoading(false)
     );
-  }, [fetchBilling, fetchInvoices, fetchUsage]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
-    fetchInvoices();
-  }, [fetchInvoices]);
+    if (!loading) {
+      fetchInvoices();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [invoicePage]);
+
+  const currentPlanInfo = billing ? PLAN_DISPLAY[billing.plan] || PLAN_DISPLAY.free : null;
 
   const handleChangePlan = async () => {
     if (!selectedPlan || !billing) return;
 
-    const currentPrice = billing.plan.price;
-    const targetPlan = billing.plans.find((p) => p.id === selectedPlan);
-    if (!targetPlan) return;
+    const currentOrder = ["free", "pro", "enterprise"].indexOf(billing.plan);
+    const targetOrder = ["free", "pro", "enterprise"].indexOf(selectedPlan);
 
     setChangingPlan(true);
 
     try {
-      if (targetPlan.price > currentPrice) {
+      if (targetOrder > currentOrder) {
         // Upgrade: redirect to checkout
         const data = await apiFetch("/api/billing/checkout", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ plan_id: selectedPlan }),
+          body: JSON.stringify({ plan: selectedPlan }),
         });
         if (data.checkout_url) {
           window.location.href = data.checkout_url;
@@ -126,8 +152,8 @@ export default function BillingPage() {
         setChangingPlan(false);
         return;
       }
-    } catch {
-      // error handling
+    } catch (error) {
+      console.error("Failed to change plan:", error);
     } finally {
       setChangingPlan(false);
     }
@@ -140,23 +166,23 @@ export default function BillingPage() {
       await apiFetch("/api/billing/downgrade", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan_id: selectedPlan }),
+        body: JSON.stringify({ plan: selectedPlan }),
       });
       setShowDowngradeConfirm(false);
       setShowPlanModal(false);
       setSelectedPlan(null);
       fetchBilling();
-    } catch {
-      // error handling
+    } catch (error) {
+      console.error("Failed to downgrade:", error);
     } finally {
       setChangingPlan(false);
     }
   };
 
   const usagePercent =
-    usage && usage.monthly_limit > 0
+    usage && usage.month_limit > 0
       ? Math.min(
-          Math.round((usage.monthly_usage / usage.monthly_limit) * 100),
+          Math.round((usage.month_count / usage.month_limit) * 100),
           100
         )
       : 0;
@@ -197,20 +223,20 @@ export default function BillingPage() {
       )}
 
       {/* Current Plan Card */}
-      {billing && (
+      {billing && currentPlanInfo && (
         <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <p className="text-sm font-medium text-gray-500">Current Plan</p>
               <p className="mt-1 text-2xl font-bold capitalize text-gray-900">
-                {billing.plan.name}
+                {currentPlanInfo.name}
               </p>
               <p className="mt-1 text-sm text-gray-600">
-                {billing.plan.price === 0
+                {currentPlanInfo.price === 0
                   ? "Free"
-                  : `$${billing.plan.price}/month`}
+                  : `$${currentPlanInfo.price}/month`}
                 {" · "}
-                {billing.plan.limit.toLocaleString()} API calls/month
+                {currentPlanInfo.limit.toLocaleString()} API calls/month
               </p>
             </div>
             <button
@@ -232,8 +258,8 @@ export default function BillingPage() {
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium text-gray-700">Monthly Usage</p>
             <p className="text-sm text-gray-500">
-              {usage.monthly_usage.toLocaleString()} /{" "}
-              {usage.monthly_limit.toLocaleString()}
+              {usage.month_count.toLocaleString()} /{" "}
+              {usage.month_limit.toLocaleString()}
             </p>
           </div>
           <div className="mt-3 h-3 w-full overflow-hidden rounded-full bg-gray-200">
@@ -279,10 +305,10 @@ export default function BillingPage() {
                 invoices.map((inv) => (
                   <tr key={inv.id} className="hover:bg-gray-50">
                     <td className="whitespace-nowrap px-5 py-3 text-gray-600">
-                      {new Date(inv.date).toLocaleDateString()}
+                      {new Date(inv.created_at).toLocaleDateString()}
                     </td>
                     <td className="px-5 py-3 font-medium text-gray-900">
-                      ${(inv.amount / 100).toFixed(2)}
+                      ${(inv.amount_cents / 100).toFixed(2)}
                     </td>
                     <td className="px-5 py-3">
                       <span
@@ -298,14 +324,18 @@ export default function BillingPage() {
                       </span>
                     </td>
                     <td className="px-5 py-3">
-                      <a
-                        href={inv.pdf_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm font-medium text-indigo-600 hover:text-indigo-700"
-                      >
-                        Download PDF
-                      </a>
+                      {inv.pdf_url ? (
+                        <a
+                          href={inv.pdf_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm font-medium text-indigo-600 hover:text-indigo-700"
+                        >
+                          Download PDF
+                        </a>
+                      ) : (
+                        <span className="text-sm text-gray-400">N/A</span>
+                      )}
                     </td>
                   </tr>
                 ))
@@ -350,8 +380,8 @@ export default function BillingPage() {
               </h3>
             </div>
             <div className="grid gap-4 p-6 sm:grid-cols-3">
-              {billing.plans.map((plan) => {
-                const isCurrent = plan.id === billing.plan.id;
+              {plans.map((plan) => {
+                const isCurrent = plan.id === billing.plan;
                 const isSelected = plan.id === selectedPlan;
                 return (
                   <button
@@ -375,8 +405,8 @@ export default function BillingPage() {
                       {plan.name}
                     </p>
                     <p className="mt-1 text-2xl font-bold text-gray-900">
-                      {plan.price === 0 ? "Free" : `$${plan.price}`}
-                      {plan.price > 0 && (
+                      {plan.monthly_price === 0 ? "Free" : `$${plan.monthly_price / 100}`}
+                      {plan.monthly_price > 0 && (
                         <span className="text-sm font-normal text-gray-500">
                           /mo
                         </span>
